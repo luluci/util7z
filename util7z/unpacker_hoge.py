@@ -25,8 +25,8 @@ class unpacker_hoge(unpacker):
 
 def main():
 	try:
-		cli_ = cli()
-		if cli_.unpack_ok():
+		cli_ = cli("unpack")
+		if cli_.enable():
 			unpacker_ = unpacker_hoge(cli_.archive_file)
 			unpacker_.exec()
 		return 0
