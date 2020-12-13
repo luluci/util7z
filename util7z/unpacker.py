@@ -39,12 +39,21 @@ class unpacker:
 
 	def exec(self) -> bool:
 		result = False
+		decrypt_finish = False
+		# 通知
+		print(self._archive_path + " を展開します。")
 		# 暗号化されているなら復号をトライ
 		if not self._archive_decrypted:
-			result = self.decrypt()
-			if not result:
-				print("パスワードの推測に失敗しました：[" + ",".join(self._pw) + "]")
-				return False
+			while not decrypt_finish:
+				decrypt_finish = self.decrypt()
+				if not decrypt_finish:
+					# 復号に失敗したら手動で指定するか聞く
+					print("  パスワードの推測に失敗しました：[" + ",".join(self._pw) + "]")
+					print("  手動入力？(空文字で終了)：", end="")
+					# 文字列が入力されたら復号をリトライ
+					result = self.make_pw_manual()
+					if not result:
+						return False
 		# アーカイブを展開
 		self.extract()
 		return True
@@ -128,8 +137,9 @@ class unpacker:
 		readall()を利用してpasswordが正しいかどうか判定する。
 		復号に成功していたらTrueを返す。失敗していたらFalseを返す。
 		"""
-		# パスワード作成
-		self.make_pw()
+		# リストが空ならパスワード作成
+		if not self._pw:
+			self.make_pw()
 		# 情報取得用にアーカイブを開いていたら閉じる
 		self.close()
 		# 作成したパスワードで復号をトライする
@@ -155,11 +165,25 @@ class unpacker:
 		"""
 		pass
 
+	def make_pw_manual(self) -> bool:
+		"""
+		コンソールから手動でパスワードを設定する。
+		空文字が入力されたら復号キャンセルとしてFalseを返す。
+		"""
+		pw_str = input()
+		if pw_str == "":
+			return False
+		else:
+			self._pw = [pw_str]
+			return True
+
 	def extract(self, path:str = "") -> bool:
 		result = False
 		# 展開先パスを作成
 		if path == "":
 			path = self._extract_to
+		# 通知
+		print("  " + self._extract_to + " へ展開します。")
 		# アーカイブが展開可能であれば展開する
 		if self._archive != None and self._archive_decrypted :
 			# 指定のpathへ展開

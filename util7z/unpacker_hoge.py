@@ -11,13 +11,21 @@ class unpacker_hoge(unpacker):
 		"""
 		pw:str = ""
 		# パスワード1
-		re_results = re.findall("\d{2}(\d{6})", self._archive_basename)
+		re_results = re.findall("\d{0,2}(\d{6})", self._archive_basename)
 		for result in re_results:
-			pw = "hoge-" + result
+			pw = result
 			self._pw.append(pw)
 		# パスワード2
-		pw = "hoge-" + self._latest_create_time.strftime("%y%m%d")
+		pw = self._latest_create_time.strftime("%y%m%d")
 		self._pw.append(pw)
+
+	def make_pw_manual(self) -> bool:
+		pw_str = input()
+		if pw_str == "":
+			return False
+		else:
+			self._pw = [pw_str]
+			return True
 
 	def make_instance(self, path: str):
 		return unpacker_hoge(path)

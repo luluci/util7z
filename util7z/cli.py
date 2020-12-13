@@ -10,6 +10,8 @@ class cli:
 		check:bool = False
 		self.py_file = sys.argv[0]
 		self._enable = False
+		self.archive_file :str = ""
+		self.input_file: list[str] = []
 
 		if type == "unpack":
 			check = self.make_arg_parser_unpack()
