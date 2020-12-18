@@ -1,7 +1,8 @@
-import py7zr
+import os
 import re
 import pathlib
 import datetime
+import py7zr
 
 class unpacker:
 
@@ -86,6 +87,7 @@ class unpacker:
 		if (self._archive != None):
 			# アーカイブ内をチェック
 			file_log_7zip: str = ""
+			file_info: py7zr.FileInfo
 			for file_info in self._archive.list():
 				# ファイル/フォルダチェック
 				self._item_count += 1
@@ -94,7 +96,7 @@ class unpacker:
 				else:
 					self._file_count += 1
 				# ルート要素チェック
-				if (not re.match("\w+/\w+", file_info.filename)):
+				if (not re.match("[^/]+/[^/]+", file_info.filename)):
 					self._root_item_count += 1
 					# ファイル名にスラッシュが出現しない場合はrootに存在する要素とみなす
 					# rootに存在するファイル/フォルダをカウントする
@@ -103,7 +105,8 @@ class unpacker:
 					else:
 						self._root_file_count += 1
 					# 圧縮ファイルチェック
-					if (re.match(".+\.7z", file_info.filename)):
+					# 7zファイルだけチェック
+					if (re.match(".+\.7z?$", file_info.filename)):
 						self._root_7zip_count += 1
 						file_log_7zip = file_info.filename
 				# 日時チェック
@@ -177,17 +180,25 @@ class unpacker:
 			self._pw = [pw_str]
 			return True
 
-	def extract(self, path:str = "") -> bool:
+	def extract(self, extract_to: str = "") -> bool:
 		result = False
 		# 展開先パスを作成
-		if path == "":
-			path = self._extract_to
-		# 通知
-		print("  " + self._extract_to + " へ展開します。")
+		# 引数で指定されていたらそちらを使用する
+		if extract_to == "":
+			extract_to = self._extract_to
+		# pathを作成
+		path = pathlib.Path(extract_to)
 		# アーカイブが展開可能であれば展開する
-		if self._archive != None and self._archive_decrypted :
+		# アーカイブオブジェクトが作成済み、かつ、復号済み
+		if self._archive != None and self._archive_decrypted:
+			# フォルダが存在しない場合は作成する
+			if not path.exists():
+				path.mkdir(parents=True, exist_ok=True)
+			# 通知
+			print("  " + extract_to + " へ展開します。")
 			# 指定のpathへ展開
-			self._archive.extractall(path)
+			os.chdir(extract_to)
+			self._archive.extractall(".\\")
 			# 2重圧縮ファイルであれば、そのファイルも展開する
 			if self._is_7zip_double_compress:
 				# ファイルパスを作成
@@ -201,6 +212,9 @@ class unpacker:
 					return False
 			else:
 				result = True
+		else:
+			print("ここまでで有効なアーカイブを開けていない。バグでは？")
+			result = False
 		return result
 
 	def make_instance(self, path:str):
