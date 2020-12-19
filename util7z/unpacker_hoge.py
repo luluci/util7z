@@ -39,7 +39,7 @@ def main():
 			unpacker_.exec()
 		return 0
 	except Exception as e:
-		#print(e)
+		print(e)
 		return 0
 
 
