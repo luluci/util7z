@@ -5,7 +5,7 @@ cd /D %~dp0
 cd ..
 
 set RUN_CMD=""
-set SCRIPT_FILE=util7z\unpacker_hoge.py
+set SCRIPT_FILE=util7z\packer_hoge.py
 
 if exist ".venv" (
 	set RUN_CMD=pipenv run python %SCRIPT_FILE% %*%

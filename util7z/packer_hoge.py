@@ -28,6 +28,9 @@ def main():
 	except Exception as e:
 		print(e)
 		return 0
+	except SystemExit as e:
+		print(e)
+		return 0
 
 
 if __name__ == "__main__":

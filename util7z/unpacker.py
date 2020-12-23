@@ -202,7 +202,7 @@ class unpacker:
 			# 2重圧縮ファイルであれば、そのファイルも展開する
 			if self._is_7zip_double_compress:
 				# ファイルパスを作成
-				new_file_path = path + self._7zip_file
+				new_file_path = extract_to + self._7zip_file
 				# ファイルを展開用インスタンスを作成
 				try:
 					new_instance = self.make_instance(new_file_path)
